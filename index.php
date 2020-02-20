@@ -6,7 +6,10 @@
 		$username = htmlspecialchars( $_POST[ 'username' ] );
 		$text = htmlspecialchars( $_POST[ 'text' ] );
 		$time = date( 'Y-m-d H:i:s' );
-		$connection->query( "INSERT into `comments` (`username` , `comment` ,`date` ) values ('$username','$text','$time')" );
+		$safe = $connection->prepare( "INSERT into `comments` SET username=:username, date='$time',comment=:text" );
+		$arr = [ 'username' => $username, 'text' => $text ];
+		$safe->execute( $arr );
+		header( 'Location: index.php' );
 	}
 ?>
 <!doctype html>
@@ -31,16 +34,19 @@
         font-size: 30px;
 
     }
-    .container{
+
+    .container {
         display: flex;
         align-items: center;
         border: 1px solid black;
     }
-    .container .comment{
+
+    .container .comment {
         margin-left: 30px;
     }
-    .container .namedate{
-       padding-right: 20px;
+
+    .container .namedate {
+        padding-right: 20px;
         border-right: 1px solid black;
     }
 </style>
@@ -53,11 +59,11 @@
 </body>
 
 <?php
-	foreach ( $data as $item ) {?>
-    <div class="container">
-        <h3 class="namedate"><?=$item['username']. ": " . $item['date']?></h3>
-        <p class="comment"><?=$item['comment']?></p>
-    </div>
+	foreach ( $data as $item ) { ?>
+        <div class="container">
+            <h3 class="namedate"><?= $item[ 'username' ] . ": " . $item[ 'date' ] ?></h3>
+            <p class="comment"><?= $item[ 'comment' ] ?></p>
+        </div>
 
 	<?php } ?>
 </html>
